@@ -1,0 +1,117 @@
+<!-- QUIZ ONE
+<section class="section-1" id="section-1">
+  <main>
+    <div
+      *ngIf="
+        state.current_Question_Index < state.totalQuestions;
+        else quizFinished
+      "
+    >
+      <h3 class="text-container">{{ quizText }}</h3>
+      <div class="flex">
+        <p>
+          {{ state.current_Question_Index + 1 }}/{{ state.questions.length }}
+        </p>
+        <p class="score-text">
+          Score: {{ state.current_score }}/{{ state.total_score }}
+        </p>
+      </div>
+      <p class="question-style">{{ state.currentQuestion }}</p>
+      <div class="quiz-options">
+        <button
+          class="option-btn"
+          *ngFor="let option of state.options; let i = index"
+          [ngClass]="{
+            'selected-option': selectedOption === option,
+            'correct-answer':
+              correctAnswerClass === 'correct-answer' && isCorrectAnswer(option)
+          }"
+          (click)="selectOption(option)"
+          [disabled]="isOptionSelected"
+        >
+          <span class="alphabet">{{ i + 1 }}</span>
+          {{ option }}
+        </button>
+      </div>
+      <div class="btn-flex">
+        <button class="skip-btn" id="skip-btn" type="submit">Skip</button>
+        <button
+          class="next-btn"
+          id="btn"
+          type="submit"
+          (click)="nextQuestion()"
+          [disabled]="!isOptionSelected"
+        >
+          Next
+        </button>
+      </div>
+    </div>
+    <ng-template #quizFinished>
+      <div class="quiz-finished">
+        <h1>Quiz Finished</h1>
+        <h3>You have attempted {{ state.questions.length }} Questions</h3>
+        <h3>Your Score is</h3>
+        <h3>{{ state.current_score }} out of {{ state.total_score }}</h3>
+        <button class="next-btn" id="btn" type="submit" (click)="restartQuiz()">
+          Restart Quiz
+        </button>
+      </div>
+    </ng-template>
+  </main>
+</section>
+ -->
+
+<section class="section-1" id="section-1">
+  <main>
+    <div
+      *ngIf="{
+        currentQuestion: currentQuestion$ | async,
+        totalQuestions: totalQuestions$ | async
+      } as data"
+    >
+      <div *ngIf="data.currentQuestion">
+        <h3 class="text-container">Redux Angular Quiz</h3>
+        <div class="flex">
+          <p>
+            {{ currentQuestionIndex$ | async }}/{{ totalQuestions$ | async }}
+          </p>
+          <p>Score: {{ state.current_score }}/{{ totalQuestions$ | async }}</p>
+        </div>
+
+        <p class="question-style">{{ data.currentQuestion.question }}</p>
+        <div class="quiz-options">
+          <button
+            class="option-btn"
+            [ngClass]="{
+              'selected-option': selectedOption === option,
+              'correct-answer':
+                correctAnswerClass === 'correct-answer' &&
+                isCorrectAnswer(option)
+            }"
+            *ngFor="let option of data.currentQuestion.options; let i = index"
+            (click)="selectOption(option)"
+          >
+            <span class="alphabet">{{ i + 1 }}</span>
+            {{ option }}
+          </button>
+        </div>
+        <div class="btn-flex">
+          <button
+            class="next-btn"
+            (click)="nextQuestion()"
+            [disabled]="!isOptionSelected"
+          >
+            Previous
+          </button>
+          <button
+            class="next-btn"
+            (click)="nextQuestion()"
+            [disabled]="!isOptionSelected"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</section>
