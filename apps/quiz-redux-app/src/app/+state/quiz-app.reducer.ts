@@ -1,51 +1,154 @@
 import { EntityState, EntityAdapter, createEntityAdapter } from '@ngrx/entity';
 import { createReducer, on } from '@ngrx/store';
 
-import * as QuizActions from './quiz-app.actions';
+import { QuizActions } from './quiz-app.actions';
+import { QuizApiActions } from './quiz-app.actions';
 import { QuizAppEntity } from './quiz-app.models';
 import { Quiz } from '../quiz/quiz.interface';
+import { Router } from '@angular/router';
 
 export const QUIZ_APP_FEATURE_KEY = 'quizApp';
 
 export const initialState: Quiz = {
-  totalQuestions: 0,
-  current_score: 0,
-  total_score: 0,
-  questions: [],
-  options: [],
+  currentQuestionNumber: 1,
+  totalQuestions: 1,
+  score: 0,
   currentQuestion: '',
-  current_Question_Index: 0,
+  options: [],
+  selectedOption: undefined,
+  correctAnswer: '',
+  response: '',
+  questions: [],
+  lastQuestion: false,
+  userResponses: [],
+  categories: {},
+  timer: 0,
 };
 
-export const quizAppReducer = createReducer(
+export const quizReducer = createReducer(
   initialState,
-  on(QuizActions.loadQuestionsSuccess, (state, { questions }) => ({
+  on(QuizApiActions.loadQuestionsSuccess, (state, { quizQuestions }) => ({
     ...state,
-    questions,
+    questions: quizQuestions,
+    totalQuestions: quizQuestions.length,
+    currentQuestion:
+      quizQuestions[state.currentQuestionNumber - 1].question.text,
+    options: quizQuestions[state.currentQuestionNumber - 1].incorrectAnswers
+      .concat(quizQuestions[state.currentQuestionNumber - 1].correctAnswer)
+      .sort(),
+    lastQuestion: quizQuestions.length === state.totalQuestions,
   })),
-
-  on(QuizActions.selectOption, (state, { option }) => ({
-    ...state,
-    selectedOption: option,
-    isOptionSelected: true,
-    selectedOptionClass:
-      state.questions[state.current_Question_Index].correctAnswer === option
-        ? 'correct-answer'
-        : 'incorrect-answer',
-    correctAnswerClass: 'correct-answer',
-  })),
-
   on(QuizActions.nextQuestion, (state) => {
-    const nextIndex = state.current_Question_Index + 1;
+    const currentQuestionIndex = state.currentQuestionNumber;
+    const nextQuestion = state.questions[currentQuestionIndex];
+    const currentResponse = state.userResponses[currentQuestionIndex] || '';
+    const correctAnswer = nextQuestion.correctAnswer;
+    if (state.currentQuestionNumber <= state.totalQuestions) {
+      const nextQuestion = state.questions[state.currentQuestionNumber];
 
-    const newState = {
-      ...state,
-      current_Question_Index: nextIndex,
-      currentQuestion: state.questions[nextIndex].question,
-      options: state.questions[nextIndex].options,
-    };
-    return newState;
+      // Save the response before moving to the next question
+      const updatedUserResponses = [...state.userResponses];
+      updatedUserResponses[currentQuestionIndex] = currentResponse;
+      return {
+        ...state,
+        currentQuestionNumber: state.currentQuestionNumber + 1,
+        options: nextQuestion.incorrectAnswers
+          .concat(nextQuestion.correctAnswer)
+          .sort(),
+        selectedOption: undefined,
+        lastQuestion: false,
+        response: currentResponse,
+        userResponses: updatedUserResponses,
+        correctAnswer,
+      };
+    } else {
+      return {
+        ...state,
+      };
+    }
   }),
-
-  on(QuizActions.restartQuiz, () => initialState)
+  on(QuizActions.skipQuestion, (state) => {
+    if (state.currentQuestionNumber < state.totalQuestions) {
+      const nextQuestion = state.questions[state.currentQuestionNumber];
+      return {
+        ...state,
+        currentQuestionNumber: state.currentQuestionNumber + 1,
+        options: nextQuestion.incorrectAnswers
+          .concat(nextQuestion.correctAnswer)
+          .sort(),
+        selectedOption: undefined,
+      };
+    } else {
+      return { ...state };
+    }
+  }),
+  on(QuizActions.previousQuestion, (state) => {
+    if (state.currentQuestionNumber > 1) {
+      const previousQuestionIndex = state.currentQuestionNumber - 2;
+      const previousQuestion = state.questions[previousQuestionIndex];
+      const response = state.userResponses[previousQuestionIndex] || '';
+      const correctAnswer = previousQuestion.correctAnswer;
+      console.log(previousQuestionIndex);
+      return {
+        ...state,
+        currentQuestionNumber: state.currentQuestionNumber - 1,
+        options: previousQuestion.incorrectAnswers
+          .concat(previousQuestion.correctAnswer)
+          .sort(),
+        selectedOption: response || undefined,
+        response,
+        correctAnswer,
+      };
+    } else {
+      return { ...state };
+    }
+  }),
+  on(QuizActions.selectedOption, (state, { selectedOption }) => {
+    const correctAnswer =
+      state.questions[state.currentQuestionNumber - 1].correctAnswer;
+    const updatedResponses = [...state.userResponses];
+    updatedResponses[state.currentQuestionNumber - 1] = selectedOption;
+    if (!state.response) {
+      const score =
+        selectedOption === correctAnswer ? state.score + 1 : state.score;
+      return {
+        ...state,
+        score,
+        response: selectedOption,
+        correctAnswer,
+        userResponses: updatedResponses,
+      };
+    } else {
+      return {
+        ...state,
+        response: '',
+        userResponses: updatedResponses,
+      };
+    }
+  }),
+  on(QuizActions.restartQuiz, (state) => ({
+    ...state,
+    ...initialState,
+  })),
+  on(QuizApiActions.loadCategoriesSuccess, (state, { categories }) => ({
+    ...state,
+    categories,
+  })),
+  on(QuizActions.setCurrentQuestion, (state, { currentQuestionNumber }) => {
+    if (
+      currentQuestionNumber > 0 &&
+      currentQuestionNumber <= state.questions.length
+    ) {
+      const currentQuestion = state.questions[currentQuestionNumber - 1];
+      return {
+        ...state,
+        currentQuestion: currentQuestion.question.text,
+        options: currentQuestion.incorrectAnswers
+          .concat(currentQuestion.correctAnswer)
+          .sort(),
+        currentQuestionNumber: currentQuestionNumber,
+      };
+    }
+    return state;
+  })
 );

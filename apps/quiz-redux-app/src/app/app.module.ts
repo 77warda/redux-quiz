@@ -11,22 +11,37 @@ import { EffectsModule } from '@ngrx/effects';
 import * as fromQuizApp from './+state/quiz-app.reducer';
 import { QuizAppEffects } from './+state/quiz-app.effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { QuizFinishedComponent } from './quiz-finished/quiz-finished.component';
+import { SkipQuizComponent } from './skip-quiz/skip-quiz.component';
+import { UserLoginComponent } from './user-login/user-login.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
-  declarations: [AppComponent, NxWelcomeComponent, QuizComponent],
+  declarations: [
+    AppComponent,
+    NxWelcomeComponent,
+    QuizComponent,
+    QuizFinishedComponent,
+    SkipQuizComponent,
+    UserLoginComponent,
+  ],
   imports: [
     BrowserModule,
     HttpClientModule,
+    ReactiveFormsModule,
+    FormsModule,
     RouterModule.forRoot(appRoutes, { initialNavigation: 'enabledBlocking' }),
     StoreModule,
     StoreModule.forRoot({}),
     StoreModule.forFeature(
       fromQuizApp.QUIZ_APP_FEATURE_KEY,
-      fromQuizApp.quizAppReducer
+      fromQuizApp.quizReducer
     ),
     StoreDevtoolsModule.instrument(),
     EffectsModule.forFeature([QuizAppEffects]),
-    EffectsModule.forRoot([]),
+    EffectsModule.forRoot([QuizAppEffects]),
+    NgSelectModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

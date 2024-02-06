@@ -1,17 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { Question, Quiz } from './quiz.interface';
-import { QuizReduxService } from '../quiz-redux.service';
 import { Store, select } from '@ngrx/store';
-import * as QuizActions from '../+state/quiz-app.actions';
-import { quizAppReducer } from '../+state/quiz-app.reducer';
-import { Observable, combineLatest, map, withLatestFrom } from 'rxjs';
+import { QuizActions } from '../+state/quiz-app.actions';
+import { Observable, Subscription, interval } from 'rxjs';
+import { Router } from '@angular/router';
 import {
-  selectCorrectAnswer,
   selectCurrentQuestion,
-  selectCurrentQuestionIndex,
-  selectQuestions,
+  selectCurrentQuestionNumber,
+  selectQuizState,
   selectTotalQuestions,
 } from '../+state/quiz-app.selectors';
+import { QuizReduxService } from '../quiz-redux.service';
 
 @Component({
   selector: 'quiz-app-quiz',
@@ -19,142 +18,114 @@ import {
   styleUrls: ['./quiz.component.scss'],
 })
 export class QuizComponent implements OnInit {
-  questions$!: Observable<Question[]>;
-  currentQuestionIndex$: Observable<number | null>;
-  totalQuestions$: Observable<number | null>;
-  currentQuestion$!: Observable<Question | undefined>;
-  correctAnswer$!: Observable<string>;
-  isOptionSelected = false;
-  quizText!: string;
-  selectedOption: string | null = null;
-  selectedOptionClass: string | null = null;
-  correctAnswerClass: string | null = null;
-  state: Quiz = {
-    totalQuestions: 0,
-    current_score: 0,
-    total_score: 0,
-    questions: [],
-    options: [],
-    currentQuestion: '',
-    current_Question_Index: 0,
-  };
+  constructor(
+    private store: Store<Quiz>,
+    private router: Router,
+    private quizService: QuizReduxService
+  ) {}
 
-  constructor(private triviaService: QuizReduxService, private store: Store) {
-    this.questions$ = this.store.pipe(select(selectQuestions));
-    this.currentQuestionIndex$ = this.store.pipe(
-      select(selectCurrentQuestionIndex)
-    );
-    this.totalQuestions$ = this.store.pipe(select(selectTotalQuestions));
-  }
+  quizStarted = false;
+  currentQuestionNumber$!: Observable<number>;
+  isOptionSelected = false;
+  optionWindowVisible = false;
+  sideWindowVisible = false;
+  quizQuestions$!: Observable<Quiz>;
+  selectCurrentQuestion$!: Observable<Question>;
+  totalQuestions$!: Observable<number>;
+  // nextBtn = 'Next';
+  // set timer
+  uiTimer: any;
+  startTime: any;
+  totalQuestions = 0;
+  timerSubscription!: Subscription;
+  timerDuration = 0;
 
   ngOnInit(): void {
-    this.restartQuiz();
-    this.store.dispatch(QuizActions.loadQuestions());
-    this.currentQuestionIndex$ = this.store.pipe(
-      select(selectCurrentQuestionIndex)
+    this.store.dispatch(QuizActions.loadQuizQuestions());
+    this.selectCurrentQuestion$ = this.store.pipe(
+      select(selectCurrentQuestion)
     );
-    this.totalQuestions$ = this.store.pipe(select(selectTotalQuestions));
-    this.currentQuestion$ = this.store.pipe(select(selectCurrentQuestion));
-    this.totalQuestions$ = this.store.pipe(select(selectTotalQuestions));
-    this.correctAnswer$ = this.store.pipe(select(selectCorrectAnswer));
-    this.correctAnswer$.subscribe((correctAnswer) =>
-      console.log('Correct Answer:', correctAnswer)
+    this.quizQuestions$ = this.store.select(selectQuizState);
+    this.currentQuestionNumber$ = this.store.pipe(
+      select(selectCurrentQuestionNumber)
     );
+    this.totalQuestions$ = this.store.select(selectTotalQuestions);
+
+    this.totalQuestions$.subscribe((totalQuestions: number) => {
+      this.totalQuestions = totalQuestions;
+      this.timerDuration = this.calculateTimerDuration();
+      this.startTimer();
+    });
   }
 
-  restartQuiz() {
-    // this.fetchTriviaQuestion();
-    this.state.current_score = 0;
-    this.isOptionSelected = false;
-    this.selectedOption = null;
-    this.selectedOptionClass = null;
-    this.correctAnswerClass = null;
+  calculateTimerDuration(): number {
+    return this.totalQuestions * 10;
   }
-  shuffleArray(array: string[]): string[] {
-    return array.sort(() => Math.random() - 0.6);
+  startTimer(): void {
+    let timer = this.timerDuration;
+
+    this.timerSubscription = interval(1000).subscribe(() => {
+      if (timer >= 0) {
+        const minutes = Math.floor(timer / 60);
+        const seconds = timer % 60;
+
+        const formattedMinutes = minutes < 10 ? '0' + minutes : '' + minutes;
+        const formattedSeconds = seconds < 10 ? '0' + seconds : '' + seconds;
+
+        this.uiTimer = `${formattedMinutes}:${formattedSeconds}`;
+        timer--;
+      }
+    });
   }
 
-  // fetchTriviaQuestion() {
-  //   this.triviaService.getTriviaQuestion().subscribe((triviaResponse: any) => {
-  //     if (triviaResponse) {
-  //       const questions: Question[] = triviaResponse.map(
-  //         (questionItem: any) => ({
-  //           question: questionItem.question.text,
-  //           options: this.shuffleArray([
-  //             ...questionItem.incorrectAnswers,
-  //             questionItem.correctAnswer,
-  //           ]),
-  //           correctAnswer: questionItem.correctAnswer,
-  //         })
-  //       );
-
-  //       // Dispatch the loadQuestionsSuccess action with the correct payload
-  //       this.store.dispatch(QuizActions.loadQuestionsSuccess({ questions }));
-
-  //       this.state.totalQuestions = triviaResponse.length;
-  //       this.state.total_score = triviaResponse.length;
-  //       this.state.questions = questions;
-
-  //       this.setCurrentQuestion(0);
-  //     } else {
-  //       console.error('Invalid response structure');
-  //     }
-  //   });
-  // }
+  openSideWindow() {
+    this.sideWindowVisible = true;
+    this.optionWindowVisible = false;
+  }
+  closeSideWindow() {
+    this.sideWindowVisible = false;
+  }
+  toggleOptionWindow() {
+    this.optionWindowVisible = !this.optionWindowVisible;
+  }
 
   setCurrentQuestion(index: number) {
-    this.quizText = 'Redux Angular Quiz';
-    this.state.current_Question_Index = index;
-    this.state.currentQuestion = this.state?.questions[index]?.question;
-    this.state.options = this.state?.questions[index]?.options;
+    this.store.dispatch(
+      QuizActions.setCurrentQuestion({ currentQuestionNumber: index + 1 })
+    );
   }
 
-  nextQuestion() {
-    const nextIndex = this.state.current_Question_Index + 1;
+  // againLoadQuestions() {
+  //   this.store.dispatch(QuizActions.loadQuizQuestions());
+  // }
 
-    // Dispatch the nextQuestion action
+  nextQuestion(): void {
     this.store.dispatch(QuizActions.nextQuestion());
-    this.setCurrentQuestion(nextIndex);
-
-    // reset styling
-    this.selectedOption = null;
-    this.selectedOptionClass = null;
-    this.correctAnswerClass = null;
     this.isOptionSelected = false;
-  }
-  isCorrectAnswer(option: string): boolean {
-    let correctAnswer: string | undefined;
-
-    // Use the NgRx store to get the current question and its correct answer
-    this.store
-      .pipe(select(selectCurrentQuestion))
-      .subscribe((currentQuestion) => {
-        if (currentQuestion) {
-          correctAnswer = currentQuestion.correctAnswer;
-        }
-      });
-
-    return !!correctAnswer && correctAnswer === option;
-  }
-
-  // Function to handle option selection
-  selectOption(option: string) {
-    if (!this.selectedOption) {
-      this.selectedOption = option;
-      const isCorrect = this.isCorrectAnswer(option);
-
-      console.log('Selected option:', option);
-      console.log('Is correct:', isCorrect);
-      this.store.dispatch(QuizActions.selectOption({ option, isCorrect }));
-      if (isCorrect) {
-        this.state.current_score++;
+    this.currentQuestionNumber$.subscribe((currentQuestionNumber) => {
+      console.log('current in next', currentQuestionNumber - 1);
+      console.log('total ques', this.totalQuestions);
+      if (this.totalQuestions == currentQuestionNumber) {
+        this.router.navigate(['/result']);
       }
+    });
+  }
 
-      this.selectedOptionClass = isCorrect
-        ? 'correct-answer'
-        : 'incorrect-answer';
-      this.correctAnswerClass = 'correct-answer';
-      this.isOptionSelected = true;
-    }
+  skipQuestion() {
+    this.store.dispatch(QuizActions.skipQuestion());
+  }
+
+  handleOption(selectedOption: string) {
+    this.store.dispatch(QuizActions.selectedOption({ selectedOption }));
+    this.isOptionSelected = true;
+  }
+
+  // Restart quiz method
+  // restartQuiz() {
+  //   this.againLoadQuestions();
+  //   this.store.dispatch(QuizActions.restartQuiz());
+  // }
+  previousQuestion() {
+    this.store.dispatch(QuizActions.previousQuestion());
   }
 }

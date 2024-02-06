@@ -1,0 +1,17 @@
+<div class="container">
+  <div class="result">
+    <h1>Quiz Finished</h1>
+    <h2>
+      You have done <span>{{ totalQuestions$ | async }}</span> questions
+    </h2>
+    <!-- <h3 class="restart">
+      Your Total Score is : <span>{{ currentScore$ | async }}</span> out of
+      <span>{{ totalQuestions$ | async }}</span>
+    </h3> -->
+    <h3>Do you want to restart quiz?</h3>
+    <div class="flex">
+      <!-- <button class="next-btn">Quit</button> -->
+      <button class="next-btn" (click)="restartQuiz()">Restart</button>
+    </div>
+  </div>
+</div>

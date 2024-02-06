@@ -1,0 +1,81 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+
+    h1 {
+        text-align: center;
+        font-size: 26px;
+    }
+
+    .result {
+        background: rgba(217, 214, 228, 0.12);
+        border-radius: 10px;
+        padding: 40px;
+        width: 26rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+
+
+        form {
+            .mb-4 {
+                margin-bottom: 10px;
+            }
+
+            input {
+                width: 98%;
+                padding: 0.9rem 0.3rem;
+                font-size: 19px;
+
+            }
+
+            label,
+            select {
+                display: block;
+                width: 100%;
+            }
+
+            ::placeholder {
+                font-size: 19px;
+            }
+
+            .category {
+                margin-bottom: 5px;
+            }
+
+            label {
+                margin-top: 9px;
+                font-size: 21px;
+                font-weight: 600;
+
+            }
+
+            .quizSubmit {
+                text-align: right;
+                margin-top: 10px;
+
+                button {
+                    border-radius: 30px;
+                    font-size: 1.1rem;
+                    font-weight: 600;
+                    width: 10rem;
+                    margin: 0 auto;
+                    outline: none;
+                    padding: 11px 0;
+                    text-align: center;
+                    cursor: pointer;
+                    border: none;
+                    outline: none;
+                    background-color: #0abab5;
+                    color: #fff;
+
+                    &:disabled {
+                        cursor: not-allowed;
+                        opacity: 0.7;
+                    }
+                }
+            }
+        }
+    }
+}
