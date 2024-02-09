@@ -1,11 +1,7 @@
-import { EntityState, EntityAdapter, createEntityAdapter } from '@ngrx/entity';
 import { createReducer, on } from '@ngrx/store';
-
 import { QuizActions } from './quiz-app.actions';
 import { QuizApiActions } from './quiz-app.actions';
-import { QuizAppEntity } from './quiz-app.models';
 import { Quiz } from '../quiz/quiz.interface';
-import { Router } from '@angular/router';
 
 export const QUIZ_APP_FEATURE_KEY = 'quizApp';
 
@@ -19,10 +15,9 @@ export const initialState: Quiz = {
   correctAnswer: '',
   response: '',
   questions: [],
-  lastQuestion: false,
   userResponses: [],
   categories: {},
-  timer: 0,
+  timer: '',
 };
 
 export const quizReducer = createReducer(
@@ -36,7 +31,6 @@ export const quizReducer = createReducer(
     options: quizQuestions[state.currentQuestionNumber - 1].incorrectAnswers
       .concat(quizQuestions[state.currentQuestionNumber - 1].correctAnswer)
       .sort(),
-    lastQuestion: quizQuestions.length === state.totalQuestions,
   })),
   on(QuizActions.nextQuestion, (state) => {
     const currentQuestionIndex = state.currentQuestionNumber;
@@ -56,7 +50,6 @@ export const quizReducer = createReducer(
           .concat(nextQuestion.correctAnswer)
           .sort(),
         selectedOption: undefined,
-        lastQuestion: false,
         response: currentResponse,
         userResponses: updatedUserResponses,
         correctAnswer,
@@ -150,5 +143,7 @@ export const quizReducer = createReducer(
       };
     }
     return state;
-  })
+  }),
+  on(QuizActions.startTimer, (state) => state),
+  on(QuizActions.updateTimer, (state, { timer }) => ({ ...state, timer }))
 );

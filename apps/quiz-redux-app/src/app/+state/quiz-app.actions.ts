@@ -49,6 +49,10 @@ export const QuizActions = createActionGroup({
     'load Categories': emptyProps(),
     'submit Form': props<{ formValue: any }>(),
     'set Current Question': props<{ currentQuestionNumber: number }>(),
+    'Finish Quiz': emptyProps(),
+    'Start Timer': emptyProps(),
+    'Stop Timer': emptyProps(),
+    'Update Timer': props<{ timer: string }>(),
   },
 });
 

@@ -5,9 +5,8 @@ import { QuizActions } from '../+state/quiz-app.actions';
 import { Observable, Subscription, interval } from 'rxjs';
 import { Router } from '@angular/router';
 import {
-  selectCurrentQuestion,
-  selectCurrentQuestionNumber,
-  selectQuizState,
+  selectCompleteQuiz,
+  selectTimer,
   selectTotalQuestions,
 } from '../+state/quiz-app.selectors';
 import { QuizReduxService } from '../quiz-redux.service';
@@ -32,8 +31,10 @@ export class QuizComponent implements OnInit {
   quizQuestions$!: Observable<Quiz>;
   selectCurrentQuestion$!: Observable<Question>;
   totalQuestions$!: Observable<number>;
+  completeQuiz$!: Observable<any>;
   // nextBtn = 'Next';
   // set timer
+  uiTimer$!: Observable<string>;
   uiTimer: any;
   startTime: any;
   totalQuestions = 0;
@@ -42,41 +43,52 @@ export class QuizComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.dispatch(QuizActions.loadQuizQuestions());
-    this.selectCurrentQuestion$ = this.store.pipe(
-      select(selectCurrentQuestion)
-    );
-    this.quizQuestions$ = this.store.select(selectQuizState);
-    this.currentQuestionNumber$ = this.store.pipe(
-      select(selectCurrentQuestionNumber)
-    );
-    this.totalQuestions$ = this.store.select(selectTotalQuestions);
+    this.store.dispatch(QuizActions.startTimer());
 
-    this.totalQuestions$.subscribe((totalQuestions: number) => {
-      this.totalQuestions = totalQuestions;
-      this.timerDuration = this.calculateTimerDuration();
-      this.startTimer();
-    });
+    // this.selectCurrentQuestion$ = this.store.pipe(
+    //   select(selectCurrentQuestion)
+    // );
+    // this.quizQuestions$ = this.store.select(selectQuizState);
+    // this.currentQuestionNumber$ = this.store.pipe(
+    //   select(selectCurrentQuestionNumber)
+    // );
+    // this.totalQuestions$ = this.store.select(selectTotalQuestions);
+    this.uiTimer$ = this.store.select(selectTimer);
+    this.completeQuiz$ = this.store.select(selectCompleteQuiz);
+    // this.totalQuestions$.subscribe((totalQuestions: number) => {
+    //   this.totalQuestions = totalQuestions;
+    //   this.timerDuration = this.calculateTimerDuration();
+    //   this.startTimer();
+    // });
   }
 
-  calculateTimerDuration(): number {
-    return this.totalQuestions * 10;
-  }
-  startTimer(): void {
-    let timer = this.timerDuration;
+  // calculateTimerDuration(): number {
+  //   return this.totalQuestions * 10;
+  // }
 
-    this.timerSubscription = interval(1000).subscribe(() => {
-      if (timer >= 0) {
-        const minutes = Math.floor(timer / 60);
-        const seconds = timer % 60;
+  // startTimer(): void {
+  //   setTimeout(() => {
+  //     let timer = this.timerDuration;
 
-        const formattedMinutes = minutes < 10 ? '0' + minutes : '' + minutes;
-        const formattedSeconds = seconds < 10 ? '0' + seconds : '' + seconds;
+  //     this.timerSubscription = interval(1000).subscribe(() => {
+  //       if (timer >= 0) {
+  //         const minutes = Math.floor(timer / 60);
+  //         const seconds = timer % 60;
 
-        this.uiTimer = `${formattedMinutes}:${formattedSeconds}`;
-        timer--;
-      }
-    });
-  }
+  //         const formattedMinutes = minutes < 10 ? '0' + minutes : '' + minutes;
+  //         const formattedSeconds = seconds < 10 ? '0' + seconds : '' + seconds;
+
+  //         this.uiTimer = `${formattedMinutes}:${formattedSeconds}`;
+
+  //         if (timer === 0) {
+  //           this.router.navigate(['/result']);
+  //           this.timerSubscription.unsubscribe();
+  //         }
+  //         timer--;
+  //       }
+  //     });
+  //   }, 500);
+  // }
 
   openSideWindow() {
     this.sideWindowVisible = true;
@@ -95,20 +107,9 @@ export class QuizComponent implements OnInit {
     );
   }
 
-  // againLoadQuestions() {
-  //   this.store.dispatch(QuizActions.loadQuizQuestions());
-  // }
-
   nextQuestion(): void {
     this.store.dispatch(QuizActions.nextQuestion());
     this.isOptionSelected = false;
-    this.currentQuestionNumber$.subscribe((currentQuestionNumber) => {
-      console.log('current in next', currentQuestionNumber - 1);
-      console.log('total ques', this.totalQuestions);
-      if (this.totalQuestions == currentQuestionNumber) {
-        this.router.navigate(['/result']);
-      }
-    });
   }
 
   skipQuestion() {
@@ -119,13 +120,10 @@ export class QuizComponent implements OnInit {
     this.store.dispatch(QuizActions.selectedOption({ selectedOption }));
     this.isOptionSelected = true;
   }
-
-  // Restart quiz method
-  // restartQuiz() {
-  //   this.againLoadQuestions();
-  //   this.store.dispatch(QuizActions.restartQuiz());
-  // }
   previousQuestion() {
     this.store.dispatch(QuizActions.previousQuestion());
+  }
+  finishQuiz() {
+    this.store.dispatch(QuizActions.finishQuiz());
   }
 }

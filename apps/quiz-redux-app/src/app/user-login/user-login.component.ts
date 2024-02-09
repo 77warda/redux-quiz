@@ -21,11 +21,7 @@ export class UserLoginComponent {
   quizLoginForm!: FormGroup;
   categories$!: Observable<Categories>;
   totalQuestions$!: Observable<number>;
-  constructor(
-    private store: Store,
-    private fb: FormBuilder,
-    private router: Router
-  ) {}
+  constructor(private store: Store, private fb: FormBuilder) {}
 
   ngOnInit() {
     this.store.dispatch(QuizActions.loadCategories());
@@ -42,24 +38,22 @@ export class UserLoginComponent {
   }
 
   onSubmit(formValue: any) {
-    // const selectedNumberOfQuestions =
-    //   this.quizLoginForm.get('numberOfQuestions')?.value;
-    // const selectedCategory = this.quizLoginForm.get('category')?.value;
-    // const selectedDifficulty = this.quizLoginForm.get('difficulty')?.value;
+    const selectedCategories = this.quizLoginForm
+      .get('category')
+      ?.value.map((category: any) => category.$ngOptionLabel);
+    console.log('Selected categories:', selectedCategories);
 
-    // this.store.dispatch(
-    //   QuizActions.setSelectedNumberOfQuestions({ selectedNumberOfQuestions })
-    // );
-    // this.store.dispatch(QuizActions.setSelectedCategory({ selectedCategory }));
-    // this.store.dispatch(
-    //   QuizActions.setSelectedDifficulty({ selectedDifficulty })
-    // );
+    const formDataWithCategories = {
+      ...formValue,
+      category: selectedCategories,
+    };
 
-    console.log('form submit', this.quizLoginForm.value);
+    console.log('Form submit with categories:', formDataWithCategories);
+
     this.store.dispatch(
-      QuizActions.submitForm({ formValue: this.quizLoginForm.value })
+      QuizActions.submitForm({ formValue: formDataWithCategories })
     );
+
     this.quizLoginForm.reset();
-    this.router.navigate(['/quizstart']);
   }
 }

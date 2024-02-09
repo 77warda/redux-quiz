@@ -1,4 +1,4 @@
-<section *ngIf="quizQuestions$ | async as quizQuestions">
+<section *ngIf="completeQuiz$ | async as completeQuizData">
   <div class="side-btn">
     <button (click)="openSideWindow()">
       <i class="fa fa-angle-right"></i>
@@ -8,7 +8,7 @@
     <div *ngIf="sideWindowVisible" class="side-window-container">
       <div class="side-window" (click)="$event.stopPropagation()">
         <div
-          *ngFor="let question of quizQuestions.questions; let i = index"
+          *ngFor="let question of completeQuizData.questions; let i = index"
           class="window-flex"
         >
           <h3 (click)="setCurrentQuestion(i)">
@@ -22,18 +22,18 @@
     </div>
   </div>
 
-  <div class="nav" *ngIf="quizQuestions$ | async as quizQuestions">
+  <div class="nav">
     <div class="navbar">
       <button
         class="icon-button"
         (click)="previousQuestion()"
-        [disabled]="quizQuestions.currentQuestionNumber === 1"
+        [disabled]="completeQuizData.questionNumber === 1"
       >
         <i class="fa fa-angle-left"></i>
       </button>
       <button class="ques-btn">
-        Question {{ quizQuestions.currentQuestionNumber }}/{{
-          quizQuestions.totalQuestions
+        Question {{ completeQuizData.questionNumber }}/{{
+          completeQuizData.totalQuestions
         }}
       </button>
       <button class="icon-button" (click)="nextQuestion()">
@@ -44,16 +44,22 @@
         <i class="fas fa-check-square"></i>
       </button>
 
-      <div class="timer">{{ uiTimer }}</div>
+      <!-- <div class="timer">{{ uiTimer }}</div> -->
+      <div class="timer">{{ completeQuizData.timer }}</div>
     </div>
   </div>
   <div class="container">
     <div class="quiz-flex">
       <h3>
-        {{ (selectCurrentQuestion$ | async)?.question?.text }}
+        {{ completeQuizData.currentQuestion?.question?.text }}
       </h3>
       <ul>
-        <li *ngFor="let option of quizQuestions.options; let i = index">
+        <li
+          *ngFor="
+            let option of completeQuizData.currentQuestion?.options;
+            let i = index
+          "
+        >
           {{ option }}
         </li>
       </ul>
@@ -61,23 +67,29 @@
   </div>
   <div *ngIf="optionWindowVisible" class="option-window">
     <div class="radio-btns">
-      <div *ngFor="let option of quizQuestions.options; let i = index">
+      <div
+        *ngFor="
+          let option of completeQuizData.currentQuestion?.options;
+          let i = index
+        "
+      >
         <input
           type="radio"
           type="radio"
           name="options"
           id="{{ 'option' + i }}"
           (click)="handleOption(option)"
-          [disabled]="quizQuestions.response"
+          [disabled]="completeQuizData.response"
         />
         <label
           [ngClass]="{
             correct:
-              quizQuestions.response && option === quizQuestions.correctAnswer,
+              completeQuizData.response &&
+              option === completeQuizData.correctAnswer,
             inCorrect:
-              quizQuestions.response &&
-              quizQuestions.response !== quizQuestions.correctAnswer
-                ? option === quizQuestions.response
+              completeQuizData.response &&
+              completeQuizData.response !== completeQuizData.correctAnswer
+                ? option === completeQuizData.response
                 : null
           }"
           for=""
@@ -88,13 +100,20 @@
         <button
           class="next-btn"
           (click)="previousQuestion()"
-          [disabled]="quizQuestions.currentQuestionNumber === 1"
+          [disabled]="completeQuizData.questionNumber === 1"
         >
           Previous
         </button>
-        <button class="next-btn" (click)="nextQuestion()">
+        <button
+          class="next-btn"
+          (click)="
+            completeQuizData.questionNumber < completeQuizData.totalQuestions
+              ? nextQuestion()
+              : finishQuiz()
+          "
+        >
           {{
-            quizQuestions.currentQuestionNumber < quizQuestions.totalQuestions
+            completeQuizData.questionNumber < completeQuizData.totalQuestions
               ? 'Next'
               : 'Finish'
           }}

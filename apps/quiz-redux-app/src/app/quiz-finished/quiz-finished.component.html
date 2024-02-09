@@ -1,13 +1,14 @@
-<div class="container">
+<div class="container" *ngIf="completeQuiz$ | async as completeQuizData">
   <div class="result">
     <h1>Quiz Finished</h1>
     <h2>
-      You have done <span>{{ totalQuestions$ | async }}</span> questions
+      You have done
+      <span>{{ completeQuizData.totalQuestions }}</span> questions
     </h2>
-    <!-- <h3 class="restart">
-      Your Total Score is : <span>{{ currentScore$ | async }}</span> out of
-      <span>{{ totalQuestions$ | async }}</span>
-    </h3> -->
+    <h3 class="restart">
+      Your Total Score is : <span>{{ completeQuizData.score }}</span> out of
+      <span>{{ completeQuizData.totalQuestions }}</span>
+    </h3>
     <h3>Do you want to restart quiz?</h3>
     <div class="flex">
       <!-- <button class="next-btn">Quit</button> -->

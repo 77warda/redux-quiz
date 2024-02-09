@@ -13,7 +13,7 @@
     .result {
         background: rgba(217, 214, 228, 0.12);
         border-radius: 10px;
-        padding: 40px;
+        padding: 30px;
         width: 26rem;
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 
@@ -25,8 +25,8 @@
 
             input {
                 width: 98%;
-                padding: 0.9rem 0.3rem;
-                font-size: 19px;
+                padding: 0.6rem 0.3rem;
+                font-size: 17px;
 
             }
 
@@ -37,7 +37,7 @@
             }
 
             ::placeholder {
-                font-size: 19px;
+                font-size: 17px;
             }
 
             .category {
@@ -46,8 +46,8 @@
 
             label {
                 margin-top: 9px;
-                font-size: 21px;
-                font-weight: 600;
+                font-size: 18px;
+                font-weight: 500;
 
             }
 

@@ -8,10 +8,10 @@ export interface Quiz {
   correctAnswer: string;
   response: string;
   questions: Question[];
-  lastQuestion: boolean;
+  // lastQuestion: boolean;
   userResponses: string[];
   categories: Categories;
-  timer: number;
+  timer: string;
 }
 
 // export interface Question {

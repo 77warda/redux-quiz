@@ -14,7 +14,6 @@ export const selectCurrentQuestionNumber = createSelector(
 export const selectTotalQuestions = createSelector(
   selectQuizState,
   (state: Quiz) => {
-    console.log('total', state.questions.length);
     return state.questions.length;
   }
 );
@@ -37,7 +36,6 @@ export const selectCurrentQuestion = createSelector(
   selectQuestions,
   selectCurrentQuestionNumber,
   (questions, currentQuestionNumber) => {
-    console.log('hi', questions);
     console.log('currentQuestionNumber:', currentQuestionNumber);
     const adjustedIndex = currentQuestionNumber - 1;
 
@@ -60,10 +58,47 @@ export const selectCorrectAnswer = createSelector(
 );
 
 export const selectSelectedOption = createSelector(selectQuizState, (state) => {
-  console.log('selected', state.response);
   return state.response;
 });
 export const selectUserResponses = createSelector(selectQuizState, (state) => {
-  console.log('Responses saved as', state.userResponses);
   return state.userResponses;
 });
+export const selectTimer = createSelector(
+  selectQuizState,
+  (state: Quiz) => state.timer
+);
+
+export const selectCompleteQuiz = createSelector(
+  selectQuestions,
+  selectCurrentQuestion,
+  selectScore,
+  selectCurrentQuestionNumber,
+  selectTotalQuestions,
+  selectSelectedOption,
+  selectUserResponses,
+  selectTimer,
+  selectCorrectAnswer,
+  (
+    questions,
+    currentQuestion,
+    score,
+    questionNumber,
+    totalQuestions,
+    response,
+    userResponses,
+    timer,
+    correctAnswer
+  ) => {
+    return {
+      questions,
+      currentQuestion,
+      score,
+      questionNumber,
+      totalQuestions,
+      response,
+      userResponses,
+      timer,
+      correctAnswer,
+    };
+  }
+);

@@ -9,4 +9,7 @@ export const appRoutes: Route[] = [
   { path: 'quizstart', component: QuizComponent },
   { path: 'result', component: QuizFinishedComponent },
   { path: 'skip', component: SkipQuizComponent },
+  // Wildcard route
+  // { path: '**', component: NotFoundComponent }
+  { path: '**', redirectTo: '/' },
 ];
