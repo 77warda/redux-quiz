@@ -4,18 +4,28 @@
       <i class="fa fa-angle-right"></i>
     </button>
   </div>
-  <div (click)="closeSideWindow()">
+  <div>
     <div *ngIf="sideWindowVisible" class="side-window-container">
-      <div class="side-window" (click)="$event.stopPropagation()">
+      <div class="side-window">
+        <h1><i class="fa fa-close" (click)="closeSideWindow()"></i></h1>
         <div
           *ngFor="let question of completeQuizData.questions; let i = index"
           class="window-flex"
+          [ngClass]="{
+            attempted: completeQuizData.userResponses[i]
+          }"
         >
           <h3 (click)="setCurrentQuestion(i)">
             {{ question.question.text }}
           </h3>
+
           <div class="attempted-question">
-            <i class="fa fa-check-circle"></i>
+            <i
+              [ngClass]="{
+                attemptedIcon: completeQuizData.userResponses[i]
+              }"
+              class="fa fa-check-circle"
+            ></i>
           </div>
         </div>
       </div>
@@ -92,7 +102,6 @@
                 ? option === completeQuizData.response
                 : null
           }"
-          for=""
           >{{ option }}</label
         >
       </div>

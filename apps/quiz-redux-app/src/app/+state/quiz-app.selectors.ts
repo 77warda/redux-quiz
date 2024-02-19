@@ -68,6 +68,11 @@ export const selectTimer = createSelector(
   (state: Quiz) => state.timer
 );
 
+export const selectUsername = createSelector(
+  selectQuizState,
+  (state) => state.username
+);
+
 export const selectCompleteQuiz = createSelector(
   selectQuestions,
   selectCurrentQuestion,
@@ -77,6 +82,7 @@ export const selectCompleteQuiz = createSelector(
   selectSelectedOption,
   selectUserResponses,
   selectTimer,
+  selectUsername,
   selectCorrectAnswer,
   (
     questions,
@@ -87,6 +93,7 @@ export const selectCompleteQuiz = createSelector(
     response,
     userResponses,
     timer,
+    username,
     correctAnswer
   ) => {
     return {
@@ -98,6 +105,7 @@ export const selectCompleteQuiz = createSelector(
       response,
       userResponses,
       timer,
+      username,
       correctAnswer,
     };
   }

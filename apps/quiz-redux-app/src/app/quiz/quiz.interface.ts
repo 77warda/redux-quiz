@@ -12,6 +12,7 @@ export interface Quiz {
   userResponses: string[];
   categories: Categories;
   timer: string;
+  username: string;
 }
 
 // export interface Question {

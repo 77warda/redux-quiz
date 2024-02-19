@@ -1,18 +1,73 @@
-<div class="container" *ngIf="completeQuiz$ | async as completeQuizData">
-  <div class="result">
-    <h1>Quiz Finished</h1>
-    <h2>
-      You have done
-      <span>{{ completeQuizData.totalQuestions }}</span> questions
-    </h2>
-    <h3 class="restart">
-      Your Total Score is : <span>{{ completeQuizData.score }}</span> out of
-      <span>{{ completeQuizData.totalQuestions }}</span>
-    </h3>
-    <h3>Do you want to restart quiz?</h3>
-    <div class="flex">
-      <!-- <button class="next-btn">Quit</button> -->
-      <button class="next-btn" (click)="restartQuiz()">Restart</button>
+<mat-tab-group>
+  <mat-tab label="Result">
+    <div class="container" *ngIf="completeQuiz$ | async as completeQuizData">
+      <div class="result">
+        <h1>Quiz Finished</h1>
+        <h2>
+          {{ completeQuizData.username }}, You have done
+          <span>{{ completeQuizData.totalQuestions }}</span> questions
+        </h2>
+        <h3 class="restart">
+          Your Total Score is : <span>{{ completeQuizData.score }}</span> out of
+          <span>{{ completeQuizData.totalQuestions }}</span>
+        </h3>
+        <h3 class="restart">
+          Your Percentage is :
+          <span
+            >{{
+              (completeQuizData.score / completeQuizData.totalQuestions) * 100
+            }}%</span
+          >
+        </h3>
+        <h3>Do you want to restart quiz?</h3>
+        <div class="flex">
+          <button class="next-btn" (click)="restartQuiz()">Restart</button>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+  </mat-tab>
+  <mat-tab label="Question" *ngIf="completeQuiz$ | async as completeQuizData">
+    <div
+      *ngFor="let question of completeQuizData.questions; let i = index"
+      class="result-question"
+    >
+      <h3>{{ question.question.text }}</h3>
+      <ul>
+        <li
+          *ngFor="
+            let option of question.incorrectAnswers
+              .concat(question.correctAnswer)
+              .sort()
+          "
+          [ngClass]="{
+            response:
+              option === question.correctAnswer ||
+              completeQuizData.userResponses[i] === option,
+            incorrect:
+              completeQuizData.userResponses[i] === option &&
+              option !== question.correctAnswer
+          }"
+        >
+          {{ option }}
+        </li>
+      </ul>
+      <h4 class="correct-answer">
+        Correct Answer: <span>{{ question.correctAnswer }}</span>
+      </h4>
+      <h4 class="attempted-question">
+        Attempted Question:
+        <span
+          [ngClass]="{
+            attempted: completeQuizData.userResponses[i] !== '',
+            notattempted: completeQuizData.userResponses[i] === ''
+          }"
+          >{{
+            completeQuizData.userResponses[i] === ''
+              ? 'Not Attempted'
+              : 'Attempted'
+          }}</span
+        >
+      </h4>
+    </div>
+  </mat-tab>
+</mat-tab-group>

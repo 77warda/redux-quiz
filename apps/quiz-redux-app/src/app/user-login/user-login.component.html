@@ -35,7 +35,7 @@
 
       <div>
         <label class="mb-4" for="category">Category:</label>
-        <ng-select formControlName="category" multiple="true">
+        <ng-select formControlName="category" [multiple]="true">
           <ng-option
             *ngFor="let categoryKey of categories$ | async | keyvalue"
             >{{ categoryKey.key }}</ng-option

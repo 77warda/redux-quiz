@@ -16,6 +16,8 @@ import { SkipQuizComponent } from './skip-quiz/skip-quiz.component';
 import { UserLoginComponent } from './user-login/user-login.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({
   declarations: [
@@ -42,6 +44,8 @@ import { NgSelectModule } from '@ng-select/ng-select';
     EffectsModule.forFeature([QuizAppEffects]),
     EffectsModule.forRoot([QuizAppEffects]),
     NgSelectModule,
+    BrowserAnimationsModule,
+    MatTabsModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

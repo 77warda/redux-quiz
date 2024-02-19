@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { QuizActions } from '../+state/quiz-app.actions';
 import { Router } from '@angular/router';
 import { selectCompleteQuiz } from '../+state/quiz-app.selectors';
+import { Question, Quiz } from '../quiz/quiz.interface';
 
 @Component({
   selector: 'quiz-app-quiz-finished',
@@ -14,6 +15,7 @@ export class QuizFinishedComponent implements OnInit {
   // currentScore$!: Observable<number>;
   // totalQuestions$!: Observable<number>;
   completeQuiz$!: Observable<any>;
+  questions!: Question[];
 
   constructor(private store: Store, private router: Router) {}
 
@@ -21,9 +23,10 @@ export class QuizFinishedComponent implements OnInit {
     // this.currentScore$ = this.store.pipe(select(selectCurrentScore));
     // this.totalQuestions$ = this.store.pipe(select(selectTotalQuestions));
     this.completeQuiz$ = this.store.select(selectCompleteQuiz);
-    // this.completeQuiz$.subscribe((completeQuiz) => {
-    //   console.log('Complete quiz:', completeQuiz);
-    // });
+    this.completeQuiz$.subscribe((completeQuiz) => {
+      console.log('Complete quiz:', completeQuiz);
+      this.questions = completeQuiz.questions;
+    });
   }
 
   restartQuiz() {

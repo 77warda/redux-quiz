@@ -18,6 +18,7 @@ export const initialState: Quiz = {
   userResponses: [],
   categories: {},
   timer: '',
+  username: '',
 };
 
 export const quizReducer = createReducer(
@@ -121,7 +122,17 @@ export const quizReducer = createReducer(
   }),
   on(QuizActions.restartQuiz, (state) => ({
     ...state,
-    ...initialState,
+    currentQuestionNumber: 1,
+    totalQuestions: 1,
+    score: 0,
+    currentQuestion: '',
+    options: [],
+    selectedOption: undefined,
+    correctAnswer: '',
+    response: '',
+    questions: [],
+    userResponses: [],
+    timer: '',
   })),
   on(QuizApiActions.loadCategoriesSuccess, (state, { categories }) => ({
     ...state,
@@ -145,5 +156,9 @@ export const quizReducer = createReducer(
     return state;
   }),
   on(QuizActions.startTimer, (state) => state),
-  on(QuizActions.updateTimer, (state, { timer }) => ({ ...state, timer }))
+  on(QuizActions.updateTimer, (state, { timer }) => ({ ...state, timer })),
+  on(QuizActions.submitForm, (state, { formValue }) => ({
+    ...state,
+    username: formValue.username,
+  }))
 );

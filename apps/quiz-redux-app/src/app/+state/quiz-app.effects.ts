@@ -11,12 +11,13 @@ import {
   takeUntil,
   EMPTY,
   take,
+  filter,
 } from 'rxjs';
 import { QuizActions } from './quiz-app.actions';
 import { QuizApiActions } from './quiz-app.actions';
 import { QuizReduxService } from '../quiz-redux.service';
 import { Store } from '@ngrx/store';
-import { selectTotalQuestions } from './quiz-app.selectors';
+import { selectCategories, selectTotalQuestions } from './quiz-app.selectors';
 import { Router } from '@angular/router';
 
 @Injectable()
@@ -49,10 +50,10 @@ export class QuizAppEffects {
                 minutes < 10 ? '0' + minutes : '' + minutes;
               const formattedSeconds =
                 seconds < 10 ? '0' + seconds : '' + seconds;
-              console.log(
-                'Time remaining:',
-                `${formattedMinutes}:${formattedSeconds}`
-              );
+              // console.log(
+              //   'Time remaining:',
+              //   `${formattedMinutes}:${formattedSeconds}`
+              // );
               this.store.dispatch(
                 QuizActions.updateTimer({
                   timer: `${formattedMinutes}:${formattedSeconds}`,
@@ -90,6 +91,8 @@ export class QuizAppEffects {
   loadCategories$ = createEffect(() =>
     this.actions$.pipe(
       ofType(QuizActions.loadCategories),
+      concatLatestFrom(() => this.store.select(selectCategories)),
+      filter(([i, cat]) => !Object.keys(cat).length),
       mergeMap(() =>
         this.quizService.getCategories().pipe(
           map((categories) =>

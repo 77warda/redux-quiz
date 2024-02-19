@@ -55,6 +55,7 @@ export class QuizComponent implements OnInit {
     // this.totalQuestions$ = this.store.select(selectTotalQuestions);
     this.uiTimer$ = this.store.select(selectTimer);
     this.completeQuiz$ = this.store.select(selectCompleteQuiz);
+
     // this.totalQuestions$.subscribe((totalQuestions: number) => {
     //   this.totalQuestions = totalQuestions;
     //   this.timerDuration = this.calculateTimerDuration();
