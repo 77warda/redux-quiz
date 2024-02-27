@@ -38,13 +38,22 @@ export const selectCurrentQuestion = createSelector(
   (questions, currentQuestionNumber) => {
     console.log('currentQuestionNumber:', currentQuestionNumber);
     const adjustedIndex = currentQuestionNumber - 1;
+    const currentQuestion = questions[adjustedIndex];
+
+    if (!currentQuestion) {
+      return null;
+    }
+
+    const options = currentQuestion.incorrectAnswers
+      ? [
+          ...currentQuestion.incorrectAnswers,
+          currentQuestion.correctAnswer,
+        ].sort()
+      : [currentQuestion.correctAnswer];
 
     return {
-      ...questions[adjustedIndex],
-      options:
-        questions[adjustedIndex]?.incorrectAnswers
-          .concat(questions[adjustedIndex]?.correctAnswer)
-          .sort() || [],
+      ...currentQuestion,
+      options,
     };
   }
 );

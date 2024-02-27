@@ -8,18 +8,11 @@ export interface Quiz {
   correctAnswer: string;
   response: string;
   questions: Question[];
-  // lastQuestion: boolean;
   userResponses: string[];
   categories: Categories;
   timer: string;
   username: string;
 }
-
-// export interface Question {
-//   question: string;
-//   options: string[];
-//   correctAnswer: string;
-// }
 
 export interface Question {
   category: string;

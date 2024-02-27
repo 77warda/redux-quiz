@@ -33,11 +33,13 @@ export const quizReducer = createReducer(
       .concat(quizQuestions[state.currentQuestionNumber - 1].correctAnswer)
       .sort(),
   })),
+
   on(QuizActions.nextQuestion, (state) => {
     const currentQuestionIndex = state.currentQuestionNumber;
     const nextQuestion = state.questions[currentQuestionIndex];
     const currentResponse = state.userResponses[currentQuestionIndex] || '';
-    const correctAnswer = nextQuestion.correctAnswer;
+    const correctAnswer = nextQuestion ? nextQuestion.correctAnswer : '';
+
     if (state.currentQuestionNumber <= state.totalQuestions) {
       const nextQuestion = state.questions[state.currentQuestionNumber];
 
@@ -47,9 +49,7 @@ export const quizReducer = createReducer(
       return {
         ...state,
         currentQuestionNumber: state.currentQuestionNumber + 1,
-        options: nextQuestion.incorrectAnswers
-          .concat(nextQuestion.correctAnswer)
-          .sort(),
+        options: nextQuestion.incorrectAnswers.concat(correctAnswer).sort(),
         selectedOption: undefined,
         response: currentResponse,
         userResponses: updatedUserResponses,
@@ -61,6 +61,7 @@ export const quizReducer = createReducer(
       };
     }
   }),
+
   on(QuizActions.skipQuestion, (state) => {
     if (state.currentQuestionNumber < state.totalQuestions) {
       const nextQuestion = state.questions[state.currentQuestionNumber];

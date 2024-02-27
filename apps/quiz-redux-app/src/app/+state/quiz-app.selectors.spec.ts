@@ -1,66 +1,158 @@
 import { QuizAppEntity } from './quiz-app.models';
 import {
-  quizAppAdapter,
-  QuizAppPartialState,
-  initialQuizAppState,
-} from './quiz-app.reducer';
-import * as QuizAppSelectors from './quiz-app.selectors';
+  selectCurrentQuestionNumber,
+  selectTotalQuestions,
+  selectCategories,
+  selectScore,
+  selectQuestions,
+  selectCurrentQuestion,
+  selectCorrectAnswer,
+  selectSelectedOption,
+  selectUserResponses,
+  selectTimer,
+  selectUsername,
+  selectCompleteQuiz,
+} from './quiz-app.selectors';
 
-describe('QuizApp Selectors', () => {
-  const ERROR_MSG = 'No Error Available';
-  const getQuizAppId = (it: QuizAppEntity) => it.id;
-  const createQuizAppEntity = (id: string, name = '') =>
-    ({
-      id,
-      name: name || `name-${id}`,
-    } as QuizAppEntity);
+describe('Quiz App Selectors', () => {
+  const mockState = {
+    currentQuestionNumber: 2,
+    questions: [
+      {
+        question: 'Question 1',
+        correctAnswer: 'A',
+        options: ['A', 'B', 'C', 'D'],
+      },
+      {
+        question: 'Question 2',
+        correctAnswer: 'B',
+        options: ['A', 'B', 'C', 'D'],
+      },
+      {
+        question: 'Question 3',
+        correctAnswer: 'C',
+        options: ['A', 'B', 'C', 'D'],
+      },
+    ],
+    categories: ['Category 1', 'Category 2'],
+    score: 10,
+    response: 'B',
+    userResponses: ['A', 'B', 'C'],
+    timer: 60,
+    username: 'user',
+  };
 
-  let state: QuizAppPartialState;
+  const mockRootState = { quizApp: mockState };
 
-  beforeEach(() => {
-    state = {
-      quizApp: quizAppAdapter.setAll(
-        [
-          createQuizAppEntity('PRODUCT-AAA'),
-          createQuizAppEntity('PRODUCT-BBB'),
-          createQuizAppEntity('PRODUCT-CCC'),
-        ],
+  it('selectCurrentQuestionNumber should return the correct current question number', () => {
+    const result = selectCurrentQuestionNumber(mockRootState);
+    expect(result).toBe(2);
+  });
+
+  it('selectTotalQuestions should return the total number of questions', () => {
+    const result = selectTotalQuestions(mockRootState);
+    expect(result).toBe(3);
+  });
+
+  it('selectCategories should return the categories', () => {
+    const result = selectCategories(mockRootState);
+    expect(result).toEqual(['Category 1', 'Category 2']);
+  });
+
+  it('selectScore should return the score', () => {
+    const result = selectScore(mockRootState);
+    expect(result).toBe(10);
+  });
+
+  it('selectQuestions should return the questions array', () => {
+    const result = selectQuestions(mockRootState);
+    expect(result).toEqual(mockState.questions);
+  });
+
+  it('selectSelectedOption should return the selected option', () => {
+    const result = selectSelectedOption(mockRootState);
+    expect(result).toBe('B');
+  });
+
+  it('selectUserResponses should return the user responses', () => {
+    const result = selectUserResponses(mockRootState);
+    expect(result).toEqual(['A', 'B', 'C']);
+  });
+
+  it('selectTimer should return the timer value', () => {
+    const result = selectTimer(mockRootState);
+    expect(result).toBe(60);
+  });
+
+  it('selectUsername should return the username', () => {
+    const result = selectUsername(mockRootState);
+    expect(result).toBe('user');
+  });
+  it('selectCorrectAnswer should return the correct answer when current question is available', () => {
+    const result = selectCorrectAnswer(mockRootState);
+    expect(result).toEqual('B');
+  });
+
+  describe('selectCurrentQuestion selector', () => {
+    const mockState = {
+      questions: [
         {
-          ...initialQuizAppState,
-          selectedId: 'PRODUCT-BBB',
-          error: ERROR_MSG,
-          loaded: true,
-        }
-      ),
+          question: 'Question 1',
+          correctAnswer: 'A',
+          incorrectAnswers: ['B', 'C', 'D'],
+        },
+        {
+          question: 'Question 2',
+          correctAnswer: 'B',
+          incorrectAnswers: ['A', 'C', 'D'],
+        },
+      ],
     };
+
+    it('should return null when currentQuestionNumber is valid but there are no questions', () => {
+      const mockRootState = {
+        quizApp: { questions: [], currentQuestionNumber: 1 },
+      };
+      const result = selectCurrentQuestion(mockRootState);
+      expect(result).toBeNull();
+    });
+
+    it('should return null when currentQuestionNumber is invalid', () => {
+      const mockRootState = {
+        quizApp: { ...mockState, currentQuestionNumber: 0 },
+      };
+      const result = selectCurrentQuestion(mockRootState);
+      expect(result).toBeNull();
+    });
+
+    it('should return current question with options including incorrect answers and correct answer', () => {
+      const mockRootState = {
+        quizApp: { ...mockState, currentQuestionNumber: 1 },
+      };
+      const result = selectCurrentQuestion(mockRootState);
+      expect(result).toEqual({
+        question: 'Question 1',
+        correctAnswer: 'A',
+        incorrectAnswers: ['B', 'C', 'D'],
+        options: ['A', 'B', 'C', 'D'],
+      });
+    });
   });
-
-  describe('QuizApp Selectors', () => {
-    it('selectAllQuizApp() should return the list of QuizApp', () => {
-      const results = QuizAppSelectors.selectAllQuizApp(state);
-      const selId = getQuizAppId(results[1]);
-
-      expect(results.length).toBe(3);
-      expect(selId).toBe('PRODUCT-BBB');
-    });
-
-    it('selectEntity() should return the selected Entity', () => {
-      const result = QuizAppSelectors.selectEntity(state) as QuizAppEntity;
-      const selId = getQuizAppId(result);
-
-      expect(selId).toBe('PRODUCT-BBB');
-    });
-
-    it('selectQuizAppLoaded() should return the current "loaded" status', () => {
-      const result = QuizAppSelectors.selectQuizAppLoaded(state);
-
-      expect(result).toBe(true);
-    });
-
-    it('selectQuizAppError() should return the current "error" state', () => {
-      const result = QuizAppSelectors.selectQuizAppError(state);
-
-      expect(result).toBe(ERROR_MSG);
-    });
-  });
+  // it('selectCompleteQuiz should return the complete quiz object', () => {
+  //   const result = selectCompleteQuiz(mockRootState);
+  //   expect(result).toEqual({
+  //     questions: mockState.questions,
+  //     currentQuestion: {
+  //       correctAnswer: 'B',
+  //       question: 'Question 2',
+  //     },
+  //     score: mockState.score,
+  //     questionNumber: mockState.currentQuestionNumber,
+  //     totalQuestions: mockState.questions.length,
+  //     response: mockState.response,
+  //     userResponses: mockState.userResponses,
+  //     timer: mockState.timer,
+  //     username: mockState.username,
+  //   });
+  // });
 });

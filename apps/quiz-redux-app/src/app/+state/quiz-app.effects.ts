@@ -9,8 +9,6 @@ import {
   switchMap,
   interval,
   takeUntil,
-  EMPTY,
-  take,
   filter,
 } from 'rxjs';
 import { QuizActions } from './quiz-app.actions';
@@ -50,10 +48,6 @@ export class QuizAppEffects {
                 minutes < 10 ? '0' + minutes : '' + minutes;
               const formattedSeconds =
                 seconds < 10 ? '0' + seconds : '' + seconds;
-              // console.log(
-              //   'Time remaining:',
-              //   `${formattedMinutes}:${formattedSeconds}`
-              // );
               this.store.dispatch(
                 QuizActions.updateTimer({
                   timer: `${formattedMinutes}:${formattedSeconds}`,
