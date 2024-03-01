@@ -1,21 +1,21 @@
 <mat-tab-group>
   <mat-tab label="Result">
-    <div class="container" *ngIf="completeQuiz$ | async as completeQuizData">
+    <div class="container" *ngIf="finishQuiz$ | async as finsihQuizData">
       <div class="result">
         <h1>Quiz Finished</h1>
         <h2>
-          {{ completeQuizData.username }}, You have done
-          <span>{{ completeQuizData.totalQuestions }}</span> questions
+          {{ finsihQuizData.username }}, You have done
+          <span>{{ finsihQuizData.totalQuestions }}</span> questions
         </h2>
         <h3 class="restart">
-          Your Total Score is : <span>{{ completeQuizData.score }}</span> out of
-          <span>{{ completeQuizData.totalQuestions }}</span>
+          Your Total Score is : <span>{{ finsihQuizData.score }}</span> out of
+          <span>{{ finsihQuizData.totalQuestions }}</span>
         </h3>
         <h3 class="restart">
           Your Percentage is :
           <span
             >{{
-              (completeQuizData.score / completeQuizData.totalQuestions) * 100
+              (finsihQuizData.score / finsihQuizData.totalQuestions) * 100
             }}%</span
           >
         </h3>
@@ -26,9 +26,9 @@
       </div>
     </div>
   </mat-tab>
-  <mat-tab label="Question" *ngIf="completeQuiz$ | async as completeQuizData">
+  <mat-tab label="Question" *ngIf="finishQuiz$ | async as finsihQuizData">
     <div
-      *ngFor="let question of completeQuizData.questions; let i = index"
+      *ngFor="let question of finsihQuizData.questions; let i = index"
       class="result-question"
     >
       <h3>{{ question.question.text }}</h3>
@@ -42,9 +42,9 @@
           [ngClass]="{
             response:
               option === question.correctAnswer ||
-              completeQuizData.userResponses[i] === option,
+              finsihQuizData.userResponses[i] === option,
             incorrect:
-              completeQuizData.userResponses[i] === option &&
+              finsihQuizData.userResponses[i] === option &&
               option !== question.correctAnswer
           }"
         >
@@ -58,11 +58,11 @@
         Attempted Question:
         <span
           [ngClass]="{
-            attempted: completeQuizData.userResponses[i] !== '',
-            notattempted: completeQuizData.userResponses[i] === ''
+            attempted: finsihQuizData.userResponses[i] !== '',
+            notattempted: finsihQuizData.userResponses[i] === ''
           }"
           >{{
-            completeQuizData.userResponses[i] === ''
+            finsihQuizData.userResponses[i] === ''
               ? 'Not Attempted'
               : 'Attempted'
           }}</span

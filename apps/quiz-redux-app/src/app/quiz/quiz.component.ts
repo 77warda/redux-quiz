@@ -1,15 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { Question, Quiz } from './quiz.interface';
-import { Store, select } from '@ngrx/store';
+import { Quiz } from './quiz.interface';
+import { Store } from '@ngrx/store';
 import { QuizActions } from '../+state/quiz-app.actions';
-import { Observable, Subscription, interval } from 'rxjs';
-import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import {
   selectCompleteQuiz,
-  selectTimer,
-  selectTotalQuestions,
+  selectOptionWindowVisible,
+  selectSideWindowVisible,
 } from '../+state/quiz-app.selectors';
-import { QuizReduxService } from '../quiz-redux.service';
 
 @Component({
   selector: 'quiz-app-quiz',
@@ -17,89 +15,37 @@ import { QuizReduxService } from '../quiz-redux.service';
   styleUrls: ['./quiz.component.scss'],
 })
 export class QuizComponent implements OnInit {
-  constructor(
-    private store: Store<Quiz>,
-    private router: Router,
-    private quizService: QuizReduxService
-  ) {}
+  constructor(private store: Store<Quiz>) {}
 
-  quizStarted = false;
   currentQuestionNumber$!: Observable<number>;
   isOptionSelected = false;
-  optionWindowVisible = false;
-  sideWindowVisible = false;
-  quizQuestions$!: Observable<Quiz>;
-  selectCurrentQuestion$!: Observable<Question>;
-  totalQuestions$!: Observable<number>;
+  // optionWindowVisible = false;
+  // sideWindowVisible = false;
   completeQuiz$!: Observable<any>;
-  // nextBtn = 'Next';
-  // set timer
-  uiTimer$!: Observable<string>;
-  uiTimer: any;
-  startTime: any;
-  totalQuestions = 0;
-  timerSubscription!: Subscription;
-  timerDuration = 0;
+  // sideWindowVisible$!: Observable<boolean>;
+  // optionWindowVisible$!: Observable<boolean>;
 
   ngOnInit(): void {
     this.store.dispatch(QuizActions.loadQuizQuestions());
     this.store.dispatch(QuizActions.startTimer());
-
-    // this.selectCurrentQuestion$ = this.store.pipe(
-    //   select(selectCurrentQuestion)
-    // );
-    // this.quizQuestions$ = this.store.select(selectQuizState);
-    // this.currentQuestionNumber$ = this.store.pipe(
-    //   select(selectCurrentQuestionNumber)
-    // );
-    // this.totalQuestions$ = this.store.select(selectTotalQuestions);
-    this.uiTimer$ = this.store.select(selectTimer);
     this.completeQuiz$ = this.store.select(selectCompleteQuiz);
-
-    // this.totalQuestions$.subscribe((totalQuestions: number) => {
-    //   this.totalQuestions = totalQuestions;
-    //   this.timerDuration = this.calculateTimerDuration();
-    //   this.startTimer();
+    // this.sideWindowVisible$ = this.store.select(selectSideWindowVisible);
+    // this.optionWindowVisible$ = this.store.select(selectOptionWindowVisible);
+    // this.optionWindowVisible$.subscribe((completeQuiz) => {
+    //   console.log('side:', completeQuiz);
     // });
   }
 
-  // calculateTimerDuration(): number {
-  //   return this.totalQuestions * 10;
-  // }
-
-  // startTimer(): void {
-  //   setTimeout(() => {
-  //     let timer = this.timerDuration;
-
-  //     this.timerSubscription = interval(1000).subscribe(() => {
-  //       if (timer >= 0) {
-  //         const minutes = Math.floor(timer / 60);
-  //         const seconds = timer % 60;
-
-  //         const formattedMinutes = minutes < 10 ? '0' + minutes : '' + minutes;
-  //         const formattedSeconds = seconds < 10 ? '0' + seconds : '' + seconds;
-
-  //         this.uiTimer = `${formattedMinutes}:${formattedSeconds}`;
-
-  //         if (timer === 0) {
-  //           this.router.navigate(['/result']);
-  //           this.timerSubscription.unsubscribe();
-  //         }
-  //         timer--;
-  //       }
-  //     });
-  //   }, 500);
-  // }
-
   openSideWindow() {
-    this.sideWindowVisible = true;
-    this.optionWindowVisible = false;
+    this.store.dispatch(QuizActions.openSideWindow());
   }
+
   closeSideWindow() {
-    this.sideWindowVisible = false;
+    this.store.dispatch(QuizActions.closeSideWindow());
   }
+
   toggleOptionWindow() {
-    this.optionWindowVisible = !this.optionWindowVisible;
+    this.store.dispatch(QuizActions.toggleOptionWindow());
   }
 
   setCurrentQuestion(index: number) {

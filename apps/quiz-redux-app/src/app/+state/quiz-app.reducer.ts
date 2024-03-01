@@ -19,6 +19,8 @@ export const initialState: Quiz = {
   categories: {},
   timer: '',
   username: '',
+  sideWindowVisible: false,
+  optionWindowVisible: false,
 };
 
 export const quizReducer = createReducer(
@@ -161,5 +163,18 @@ export const quizReducer = createReducer(
   on(QuizActions.submitForm, (state, { formValue }) => ({
     ...state,
     username: formValue.username,
+  })),
+  on(QuizActions.openSideWindow, (state) => ({
+    ...state,
+    sideWindowVisible: true,
+    optionWindowVisible: false,
+  })),
+  on(QuizActions.closeSideWindow, (state) => ({
+    ...state,
+    sideWindowVisible: false,
+  })),
+  on(QuizActions.toggleOptionWindow, (state) => ({
+    ...state,
+    optionWindowVisible: !state.optionWindowVisible,
   }))
 );

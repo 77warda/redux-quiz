@@ -32,18 +32,23 @@ export class QuizAppEffects {
       this.actions$.pipe(
         ofType(QuizApiActions.loadQuestionsSuccess),
         concatLatestFrom(() => this.store.select(selectTotalQuestions)),
+        tap(() => console.log('hello')),
         switchMap(([action, totalQuestions]) => {
           const timerDuration = totalQuestions * 10;
-          console.log('Timer started');
+          console.log('timer');
           return interval(1000).pipe(
             takeUntil(this.actions$.pipe(ofType(QuizActions.finishQuiz))),
             map((timeElapsed) => timerDuration - timeElapsed),
+            tap(() => console.log('time')),
             tap((remainingTime) => {
+              console.log('time', timerDuration);
               if (remainingTime === 0) {
+                console.log('time', remainingTime);
                 this.store.dispatch(QuizActions.finishQuiz());
               }
               const minutes = Math.floor(remainingTime / 60);
               const seconds = remainingTime % 60;
+
               const formattedMinutes =
                 minutes < 10 ? '0' + minutes : '' + minutes;
               const formattedSeconds =
@@ -87,6 +92,7 @@ export class QuizAppEffects {
       ofType(QuizActions.loadCategories),
       concatLatestFrom(() => this.store.select(selectCategories)),
       filter(([i, cat]) => !Object.keys(cat).length),
+      tap(() => console.log('categories here')),
       mergeMap(() =>
         this.quizService.getCategories().pipe(
           map((categories) =>
@@ -105,6 +111,16 @@ export class QuizAppEffects {
         ofType(QuizActions.finishQuiz),
         tap(() => {
           this.router.navigate(['/result']);
+        })
+      ),
+    { dispatch: false }
+  );
+  restartQuiz$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(QuizActions.restartQuiz),
+        tap(() => {
+          this.router.navigate(['/']);
         })
       ),
     { dispatch: false }

@@ -5,7 +5,10 @@
     </button>
   </div>
   <div>
-    <div *ngIf="sideWindowVisible" class="side-window-container">
+    <div
+      *ngIf="completeQuizData.selectSideWindowVisible"
+      class="side-window-container"
+    >
       <div class="side-window">
         <h1><i class="fa fa-close" (click)="closeSideWindow()"></i></h1>
         <div
@@ -75,7 +78,7 @@
       </ul>
     </div>
   </div>
-  <div *ngIf="optionWindowVisible" class="option-window">
+  <div *ngIf="completeQuizData.selectOptionWindowVisible" class="option-window">
     <div class="radio-btns">
       <div
         *ngFor="

@@ -12,6 +12,8 @@ import {
   selectTimer,
   selectUsername,
   selectCompleteQuiz,
+  selectSideWindowVisible,
+  selectOptionWindowVisible,
 } from './quiz-app.selectors';
 
 describe('Quiz App Selectors', () => {
@@ -40,6 +42,8 @@ describe('Quiz App Selectors', () => {
     userResponses: ['A', 'B', 'C'],
     timer: 60,
     username: 'user',
+    sideWindowVisible: true,
+    optionWindowVisible: false,
   };
 
   const mockRootState = { quizApp: mockState };
@@ -124,7 +128,15 @@ describe('Quiz App Selectors', () => {
       const result = selectCurrentQuestion(mockRootState);
       expect(result).toBeNull();
     });
+    it('selectSideWindowVisible should return the visibility of the side window', () => {
+      const result = selectSideWindowVisible(mockRootState);
+      expect(result).toBe(true);
+    });
 
+    it('selectOptionWindowVisible should return the visibility of the option window', () => {
+      const result = selectOptionWindowVisible(mockRootState);
+      expect(result).toBe(false);
+    });
     it('should return current question with options including incorrect answers and correct answer', () => {
       const mockRootState = {
         quizApp: { ...mockState, currentQuestionNumber: 1 },
@@ -138,21 +150,4 @@ describe('Quiz App Selectors', () => {
       });
     });
   });
-  // it('selectCompleteQuiz should return the complete quiz object', () => {
-  //   const result = selectCompleteQuiz(mockRootState);
-  //   expect(result).toEqual({
-  //     questions: mockState.questions,
-  //     currentQuestion: {
-  //       correctAnswer: 'B',
-  //       question: 'Question 2',
-  //     },
-  //     score: mockState.score,
-  //     questionNumber: mockState.currentQuestionNumber,
-  //     totalQuestions: mockState.questions.length,
-  //     response: mockState.response,
-  //     userResponses: mockState.userResponses,
-  //     timer: mockState.timer,
-  //     username: mockState.username,
-  //   });
-  // });
 });

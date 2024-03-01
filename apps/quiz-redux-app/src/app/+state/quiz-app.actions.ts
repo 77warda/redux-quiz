@@ -53,6 +53,9 @@ export const QuizActions = createActionGroup({
     'Start Timer': emptyProps(),
     'Stop Timer': emptyProps(),
     'Update Timer': props<{ timer: string }>(),
+    'Open Side Window': emptyProps(),
+    'Close Side Window': emptyProps(),
+    'Toggle Option Window': emptyProps(),
   },
 });
 

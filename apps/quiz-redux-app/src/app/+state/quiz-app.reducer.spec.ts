@@ -322,4 +322,37 @@ describe('Quiz Reducer', () => {
       expect(newState.timer).toBe('');
     });
   });
+
+  it('should handle openSideWindow action correctly', () => {
+    const action = QuizActions.openSideWindow();
+    const newState = quizReducer(initialState, action);
+    expect(newState.sideWindowVisible).toBe(true);
+    expect(newState.optionWindowVisible).toBe(false);
+  });
+
+  it('should handle closeSideWindow action correctly', () => {
+    const stateWithOpenSideWindow = {
+      ...initialState,
+      sideWindowVisible: true,
+    };
+    const action = QuizActions.closeSideWindow();
+    const newState = quizReducer(stateWithOpenSideWindow, action);
+    expect(newState.sideWindowVisible).toBe(false);
+  });
+
+  it('should handle toggleOptionWindow action correctly when optionWindowVisible is false', () => {
+    const action = QuizActions.toggleOptionWindow();
+    const newState = quizReducer(initialState, action);
+    expect(newState.optionWindowVisible).toBe(true);
+  });
+
+  it('should handle toggleOptionWindow action correctly when optionWindowVisible is true', () => {
+    const stateWithOpenOptionWindow = {
+      ...initialState,
+      optionWindowVisible: true,
+    };
+    const action = QuizActions.toggleOptionWindow();
+    const newState = quizReducer(stateWithOpenOptionWindow, action);
+    expect(newState.optionWindowVisible).toBe(false);
+  });
 });

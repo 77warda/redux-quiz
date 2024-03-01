@@ -25,10 +25,10 @@ export class UserLoginComponent {
 
   ngOnInit() {
     this.store.dispatch(QuizActions.loadCategories());
-
-    // this.totalQuestions$ = this.store.select(selectTotalQuestions);
     this.categories$ = this.store.select(selectCategories);
-    // this.store.dispatch(QuizActions.loadCategories());
+    // this.categories$.subscribe((cat) => {
+    //   console.log('cat quiz:', cat);
+    // });
     this.quizLoginForm = this.fb.group({
       username: ['', [Validators.required]],
       numberOfQuestions: [0, [Validators.required, Validators.min(1)]],
@@ -41,14 +41,14 @@ export class UserLoginComponent {
     const selectedCategories = this.quizLoginForm
       .get('category')
       ?.value.map((category: any) => category.$ngOptionLabel);
-    console.log('Selected categories:', selectedCategories);
+    // console.log('Selected categories:', selectedCategories);
 
     const formDataWithCategories = {
       ...formValue,
       category: selectedCategories,
     };
 
-    console.log('Form submit with categories:', formDataWithCategories);
+    // console.log('Form submit with categories:', formDataWithCategories);
 
     this.store.dispatch(
       QuizActions.submitForm({ formValue: formDataWithCategories })

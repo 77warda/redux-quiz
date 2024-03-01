@@ -12,6 +12,8 @@ export interface Quiz {
   categories: Categories;
   timer: string;
   username: string;
+  sideWindowVisible: boolean;
+  optionWindowVisible: boolean;
 }
 
 export interface Question {

@@ -17,10 +17,10 @@ export const selectTotalQuestions = createSelector(
     return state.questions.length;
   }
 );
-export const selectCategories = createSelector(
-  selectQuizState,
-  (state) => state.categories
-);
+export const selectCategories = createSelector(selectQuizState, (state) => {
+  console.log(state.categories);
+  return state.categories;
+});
 
 export const selectScore = createSelector(
   selectQuizState,
@@ -36,7 +36,7 @@ export const selectCurrentQuestion = createSelector(
   selectQuestions,
   selectCurrentQuestionNumber,
   (questions, currentQuestionNumber) => {
-    console.log('currentQuestionNumber:', currentQuestionNumber);
+    // console.log('currentQuestionNumber:', currentQuestionNumber);
     const adjustedIndex = currentQuestionNumber - 1;
     const currentQuestion = questions[adjustedIndex];
 
@@ -60,10 +60,7 @@ export const selectCurrentQuestion = createSelector(
 
 export const selectCorrectAnswer = createSelector(
   selectCurrentQuestion,
-  (currentQuestion) => {
-    console.log('correct', currentQuestion?.correctAnswer);
-    return currentQuestion?.correctAnswer;
-  }
+  (currentQuestion) => currentQuestion?.correctAnswer
 );
 
 export const selectSelectedOption = createSelector(selectQuizState, (state) => {
@@ -82,6 +79,16 @@ export const selectUsername = createSelector(
   (state) => state.username
 );
 
+export const selectSideWindowVisible = createSelector(
+  selectQuizState,
+  (state) => state.sideWindowVisible
+);
+
+export const selectOptionWindowVisible = createSelector(
+  selectQuizState,
+  (state) => state.optionWindowVisible
+);
+
 export const selectCompleteQuiz = createSelector(
   selectQuestions,
   selectCurrentQuestion,
@@ -93,6 +100,8 @@ export const selectCompleteQuiz = createSelector(
   selectTimer,
   selectUsername,
   selectCorrectAnswer,
+  selectSideWindowVisible,
+  selectOptionWindowVisible,
   (
     questions,
     currentQuestion,
@@ -102,6 +111,46 @@ export const selectCompleteQuiz = createSelector(
     response,
     userResponses,
     timer,
+    username,
+    correctAnswer,
+    selectSideWindowVisible,
+    selectOptionWindowVisible
+  ) => {
+    return {
+      questions,
+      currentQuestion,
+      score,
+      questionNumber,
+      totalQuestions,
+      response,
+      userResponses,
+      timer,
+      username,
+      correctAnswer,
+      selectSideWindowVisible,
+      selectOptionWindowVisible,
+    };
+  }
+);
+
+export const selectFinishQuiz = createSelector(
+  selectQuestions,
+  selectCurrentQuestion,
+  selectScore,
+  selectCurrentQuestionNumber,
+  selectTotalQuestions,
+  selectSelectedOption,
+  selectUserResponses,
+  selectUsername,
+  selectCorrectAnswer,
+  (
+    questions,
+    currentQuestion,
+    score,
+    questionNumber,
+    totalQuestions,
+    response,
+    userResponses,
     username,
     correctAnswer
   ) => {
@@ -113,7 +162,6 @@ export const selectCompleteQuiz = createSelector(
       totalQuestions,
       response,
       userResponses,
-      timer,
       username,
       correctAnswer,
     };
