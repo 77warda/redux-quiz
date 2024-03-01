@@ -161,8 +161,6 @@ describe('QuizEffects', () => {
       const updateTimer = QuizActions.updateTimer({
         timer: '00:50',
       });
-      // const finishQuiz = QuizActions.finishQuiz();
-
       actions$ = of(loadQuestionsSuccessAction);
       effects.startTimer$.subscribe();
       tick(1000);
