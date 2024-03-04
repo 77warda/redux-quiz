@@ -1,5 +1,5 @@
 import { Question, Quiz } from '../quiz/quiz.interface';
-import { QuizAppEntity } from './quiz-app.models';
+import { QUIZ_APP_FEATURE_KEY } from './quiz-app.reducer';
 import {
   selectCurrentQuestionNumber,
   selectTotalQuestions,
@@ -12,7 +12,6 @@ import {
   selectUserResponses,
   selectTimer,
   selectUsername,
-  selectCompleteQuiz,
   selectSideWindowVisible,
   selectOptionWindowVisible,
 } from './quiz-app.selectors';
@@ -68,7 +67,7 @@ describe('Quiz App Selectors', () => {
     optionWindowVisible: false,
   };
 
-  const mockRootState = { quizApp: mockState };
+  const mockRootState = { [QUIZ_APP_FEATURE_KEY]: mockState };
 
   it('selectCurrentQuestionNumber should return the correct current question number', () => {
     const result = selectCurrentQuestionNumber.projector(mockRootState.quizApp);

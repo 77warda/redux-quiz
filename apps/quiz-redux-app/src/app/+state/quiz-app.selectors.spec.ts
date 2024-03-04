@@ -1,4 +1,5 @@
 import { QuizAppEntity } from './quiz-app.models';
+import { QUIZ_APP_FEATURE_KEY } from './quiz-app.reducer';
 import {
   selectCurrentQuestionNumber,
   selectTotalQuestions,
@@ -46,7 +47,7 @@ describe('Quiz App Selectors', () => {
     optionWindowVisible: false,
   };
 
-  const mockRootState = { quizApp: mockState };
+  const mockRootState = { [QUIZ_APP_FEATURE_KEY]: mockState };
 
   it('selectCurrentQuestionNumber should return the correct current question number', () => {
     const result = selectCurrentQuestionNumber(mockRootState);

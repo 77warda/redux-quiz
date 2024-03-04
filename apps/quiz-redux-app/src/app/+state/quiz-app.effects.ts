@@ -35,7 +35,6 @@ export class QuizAppEffects {
         tap(() => console.log('hello')),
         switchMap(([action, totalQuestions]) => {
           const timerDuration = totalQuestions * 10;
-          console.log('timer');
           return interval(1000).pipe(
             takeUntil(this.actions$.pipe(ofType(QuizActions.finishQuiz))),
             map((timeElapsed) => timerDuration - timeElapsed),
@@ -43,7 +42,6 @@ export class QuizAppEffects {
             tap((remainingTime) => {
               console.log('time', timerDuration);
               if (remainingTime === 0) {
-                console.log('time', remainingTime);
                 this.store.dispatch(QuizActions.finishQuiz());
               }
               const minutes = Math.floor(remainingTime / 60);

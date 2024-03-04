@@ -15,6 +15,8 @@ import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { QuizReduxService } from '../quiz-redux.service';
 import { Categories, Question } from '../quiz/quiz.interface';
 import { selectTotalQuestions } from './quiz-app.selectors';
+import { QuizFinishedComponent } from '../quiz-finished/quiz-finished.component';
+import { QuizComponent } from '../quiz/quiz.component';
 
 describe('QuizEffects', () => {
   let actions$: Observable<any>;
@@ -22,13 +24,17 @@ describe('QuizEffects', () => {
   let quizService: QuizReduxService;
   let router: Router;
   let store: MockStore;
-  const routerSpy = {
-    navigate: jest.fn(),
-  };
+  let routerNavigateSpy: jest.SpyInstance;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [RouterTestingModule],
+      imports: [
+        RouterTestingModule,
+        RouterTestingModule.withRoutes([
+          { path: 'result', component: QuizFinishedComponent },
+          { path: 'quizstart', component: QuizComponent },
+        ]),
+      ],
       providers: [
         QuizAppEffects,
         provideMockActions(() => actions$),
@@ -49,6 +55,7 @@ describe('QuizEffects', () => {
     quizService = TestBed.inject(QuizReduxService);
     router = TestBed.inject(Router);
     store = TestBed.inject(MockStore);
+    routerNavigateSpy = jest.spyOn(router, 'navigate');
   });
 
   it('should be created', () => {
@@ -56,36 +63,7 @@ describe('QuizEffects', () => {
   });
 
   describe('StartTimer$ effect ', () => {
-    it('should start the timer when loadQuestionsSuccess action is dispatched', () => {
-      const loadQuestionsSuccessAction = QuizApiActions.loadQuestionsSuccess({
-        quizQuestions: [],
-      });
-
-      actions$ = of(loadQuestionsSuccessAction);
-
-      effects.startTimer$.subscribe(() => {
-        expect(quizService.getTrivia).toHaveBeenCalled();
-        expect(store.dispatch).toHaveBeenCalledWith(
-          QuizActions.updateTimer({ timer: '05:00' })
-        );
-      });
-    });
-    it('should start the timer when loadQuestionsSuccess action is dispatched', () => {
-      const action = QuizApiActions.loadQuestionsSuccess({ quizQuestions: [] });
-      const totalQuestions = 5;
-      const expectedTimerUpdateAction = QuizActions.updateTimer({
-        timer: '05:00',
-      });
-
-      store.overrideSelector(selectTotalQuestions, totalQuestions);
-      actions$ = of(action);
-
-      effects.startTimer$.subscribe(() => {
-        // expect(quizServiceMock.getTrivia).toHaveBeenCalled();
-        expect(store.dispatch).toHaveBeenCalledWith(expectedTimerUpdateAction);
-      });
-    });
-    it('should not update the timer when finishQuiz action is dispatched', () => {
+    it('should not update the timer when finishQuiz action is dispatched', fakeAsync(() => {
       const loadQuestionsSuccessAction = QuizApiActions.loadQuestionsSuccess({
         quizQuestions: [],
       });
@@ -106,14 +84,8 @@ describe('QuizEffects', () => {
         );
         expect(quizService.getTrivia).toHaveBeenCalledWith(70);
       });
-    });
+    }));
     it('should dispatch updateTimer action when remainingTime is not 0', fakeAsync(() => {
-      const timerDuration = 300;
-      const timeElapsed = 100;
-      const remainingTime = timerDuration - timeElapsed;
-      const formattedMinutes = '01';
-      const formattedSeconds = '40';
-
       const loadQuestionsSuccessAction = QuizApiActions.loadQuestionsSuccess({
         quizQuestions: [],
       });
@@ -123,36 +95,11 @@ describe('QuizEffects', () => {
         tick(1000);
         expect(store.dispatch).toHaveBeenCalledWith(finishQuiz);
       });
-      // jest.spyOn(store, 'dispatch');
-      // effects.startTimer$.subscribe();
 
-      // Simulate the timer elapsing
-      // timer(1000)
-      //   .pipe(
-      //     take(remainingTime + 1),
-      //     map((timeElapsed) => timerDuration - timeElapsed),
-      //     tap((remainingTime) => {
-      //       const minutes = Math.floor(remainingTime / 60);
-      //       const seconds = remainingTime % 60;
-      //       console.log('mins', minutes);
-      //       console.log('seconds', seconds);
-      //       // Expectations for minutes and seconds calculation
-      //       expect(minutes).toEqual(2);
-      //       expect(seconds).toEqual(40);
-
-      //       const expectedTimer = `${formattedMinutes}:${formattedSeconds}`;
-      //       expect(store.dispatch).toHaveBeenCalledWith(
-      //         QuizActions.updateTimer({ timer: expectedTimer })
-      //       );
-      //     })
-      //   )
-      //   .subscribe();
-
-      // Advance the virtual clock to trigger the timer
       flush();
       discardPeriodicTasks();
     }));
-    it('select multiple questions', fakeAsync(() => {
+    it('should dispatch updateTimer action when questions are not 0', fakeAsync(() => {
       const spy = jest.spyOn(store, 'dispatch');
       store.overrideSelector(selectTotalQuestions, 5);
       const loadQuestionsSuccessAction = QuizApiActions.loadQuestionsSuccess({
@@ -160,6 +107,38 @@ describe('QuizEffects', () => {
       });
       const updateTimer = QuizActions.updateTimer({
         timer: '00:50',
+      });
+      actions$ = of(loadQuestionsSuccessAction);
+      effects.startTimer$.subscribe();
+      tick(1000);
+      expect(spy).toHaveBeenCalledWith(updateTimer);
+      flush();
+      discardPeriodicTasks();
+    }));
+    it('should dispatch updateTimer action when questions are 0', fakeAsync(() => {
+      const spy = jest.spyOn(store, 'dispatch');
+      store.overrideSelector(selectTotalQuestions, 0);
+      const loadQuestionsSuccessAction = QuizApiActions.loadQuestionsSuccess({
+        quizQuestions: [],
+      });
+      const updateTimer = QuizActions.updateTimer({
+        timer: '00:00',
+      });
+      actions$ = of(loadQuestionsSuccessAction);
+      effects.startTimer$.subscribe();
+      tick(1000);
+      expect(spy).toHaveBeenCalledWith(updateTimer);
+      flush();
+      discardPeriodicTasks();
+    }));
+    it('should dispatch updateTimer action when time is more than 60s ', fakeAsync(() => {
+      const spy = jest.spyOn(store, 'dispatch');
+      store.overrideSelector(selectTotalQuestions, 10);
+      const loadQuestionsSuccessAction = QuizApiActions.loadQuestionsSuccess({
+        quizQuestions: [],
+      });
+      const updateTimer = QuizActions.updateTimer({
+        timer: '01:40',
       });
       actions$ = of(loadQuestionsSuccessAction);
       effects.startTimer$.subscribe();
@@ -221,7 +200,7 @@ describe('QuizEffects', () => {
       ];
     });
 
-    it('should load trivia successfully', () => {
+    it('should load trivia successfully', fakeAsync(() => {
       const quizQuestions = mockQuestions;
       const action = QuizActions.submitForm({
         formValue: { username: 'testUser' },
@@ -230,15 +209,19 @@ describe('QuizEffects', () => {
 
       jest.spyOn(quizService, 'getTrivia').mockReturnValue(of(quizQuestions));
 
-      const expected = QuizApiActions.loadQuestionsSuccess({ quizQuestions });
+      const expected = [
+        QuizApiActions.loadQuestionsSuccess({ quizQuestions }),
+        QuizActions.startTimer(),
+      ];
 
+      let i = 0;
       effects.loadTrivia$.subscribe((result) => {
-        console.log('hello');
-        expect(result).toEqual(expected);
+        expect(result).toEqual(expected[i++]);
       });
-    });
+      flush();
+    }));
 
-    it('should handle errors when loading trivia', () => {
+    it('should handle errors when loading trivia', fakeAsync(() => {
       const error = new Error('Failed to load trivia');
       const action = QuizActions.submitForm({
         formValue: { username: 'testUser' },
@@ -252,19 +235,27 @@ describe('QuizEffects', () => {
       effects.loadTrivia$.subscribe((result) => {
         expect(result).toEqual(expected);
       });
-    });
-    it('should navigate to "/quizstart" after form submission', () => {
+      flush();
+    }));
+
+    it('should navigate to "/quizstart" after form submission', fakeAsync(() => {
       const action = QuizActions.submitForm({
         formValue: { username: 'testUser' },
       });
       actions$ = of(action);
-
+      const spy = jest
+        .spyOn(quizService, 'getTrivia')
+        .mockReturnValue(of(mockQuestions));
       const navigateSpy = jest.spyOn(router, 'navigate');
 
-      effects.loadTrivia$.subscribe(() => {
+      effects.loadTrivia$.subscribe((result) => {
+        console.log('Effect triggered');
+        console.log('result', result);
         expect(navigateSpy).toHaveBeenCalledWith(['/quizstart']);
       });
-    });
+      tick();
+      flush();
+    }));
   });
 
   describe('loadCategories$ Effect', () => {
@@ -351,7 +342,6 @@ describe('QuizEffects', () => {
       jest
         .spyOn(quizService, 'getCategories')
         .mockReturnValue(throwError(error));
-      // quizService.getCategories.and.returnValue(throwError(error));
 
       const expected = QuizApiActions.loadCategoriesFailure({ error });
 
@@ -363,26 +353,28 @@ describe('QuizEffects', () => {
   });
 
   describe('finishQuiz$ Effect', () => {
-    it('should navigate to /result when finishQuiz action is dispatched', () => {
+    it('should navigate to /result when finishQuiz action is dispatched', fakeAsync(() => {
       const action = QuizActions.finishQuiz();
-
+      const spy = jest.spyOn(router, 'navigate');
       actions$ = of(action);
 
       effects.finishQuiz$.subscribe(() => {
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/result']);
+        expect(spy).toHaveBeenCalledWith(['/result']);
       });
-    });
+      flush();
+    }));
   });
 
   describe('Restart Quiz$ Effect', () => {
-    it('should navigate to / when restart action is dispatched', () => {
+    it('should navigate to / when restart action is dispatched', fakeAsync(() => {
       const action = QuizActions.restartQuiz();
-
+      const spy = jest.spyOn(router, 'navigate');
       actions$ = of(action);
 
       effects.restartQuiz$.subscribe(() => {
-        expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
+        expect(spy).toHaveBeenCalledWith(['/']);
       });
-    });
+      flush();
+    }));
   });
 });
